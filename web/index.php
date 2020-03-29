@@ -1,4 +1,6 @@
 <?php
+date_default_timezone_set('Europe/Moscow');
+setlocale(LC_ALL,  'ru_RU.UTF-8', 'Rus');
 
 // comment out the following two lines when deployed to production
 defined('YII_DEBUG') or define('YII_DEBUG', true);

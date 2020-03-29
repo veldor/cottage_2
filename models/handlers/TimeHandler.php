@@ -5,6 +5,7 @@ namespace app\models\handlers;
 
 
 use app\exceptions\MyException;
+use DateTime;
 
 class TimeHandler
 {
@@ -117,5 +118,48 @@ class TimeHandler
     public function getSingleYear($timestamp): string
     {
         return strftime('%Y', $timestamp);
+    }
+
+    /**
+     * Получение срока оплаты электроэнергии
+     * @param $month <p>месяц в формате yyyy-mm</p>
+     * @return int <p>временная метка</p>
+     */
+    public function getPayUpMonth($month): int
+    {
+        $date = DateTime::createFromFormat('Y-m-j H-i-s', "{$month}-10 12-00-00");
+        $date->modify('+1 month');
+        return $date->getTimestamp();
+    }
+
+    /**
+     * Получение временной метки начала месяца
+     * @param $month <p>месяц в формате yyyy-mm</p>
+     * @return int <p>временная метка</p>
+     */
+    public function getMonthStartTimestamp($month): int
+    {
+        // получу отметку времения 2 числа первого месяца данного года - второго, чтобы исключить поправку на часовой пояс
+        $match = null;
+        preg_match('/^(\d{4})\W*(\d{2})$/', $month, $match);
+        return strtotime("2-$match[2]-$match[1]");
+    }
+
+    /**
+     * @param $shortMonth
+     * @return string
+     */
+    public function getFullFromShotMonth($shortMonth): string
+    {
+        return $this->utf8_strftime('%B %Y', DateTime::createFromFormat('Y-m-d', $shortMonth . '-10')->getTimestamp());
+    }
+
+    /**
+     * @param $format
+     * @param null $timestamp
+     * @return false|string
+     */
+    private function utf8_strftime($format, $timestamp = null){
+        return  iconv('windows-1251', 'utf-8',strftime($format, $timestamp));
     }
 }

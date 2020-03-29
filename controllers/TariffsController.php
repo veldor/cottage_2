@@ -5,8 +5,13 @@ namespace app\controllers;
 
 
 use app\models\tables\TariffPower;
+use app\models\tariffs\TariffsFill;
+use Yii;
 use yii\filters\AccessControl;
+use yii\helpers\Url;
 use yii\web\Controller;
+use yii\web\Response;
+use yii\widgets\ActiveForm;
 
 class TariffsController extends Controller
 {
@@ -30,12 +35,25 @@ class TariffsController extends Controller
     }
 
     /**
-     * @return string
+     * @return string|array
      */
-    public function actionFill(): string
+    public function actionFill()
     {
-        $month = new TariffPower(['scenario' => TariffPower::SCENARIO_FILL]);
+        $form = new TariffsFill();
+        if(Yii::$app->request->isAjax && Yii::$app->request->isPost){
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            $form->load(Yii::$app->request->post());
+            return ActiveForm::validate($form);
+        }
+        if(Yii::$app->request->isPost){
+            // сохраню пришедшие данные
+            $form->load(Yii::$app->request->post());
+            if($form->validate()){
+                $form->save();
+                return $this->redirect(Url::toRoute('tariffs/fill'), 301);
+            }
+        }
         // открою страницу с возможностью заполнения тарифов
-        return $this->render('fill', ['month' => $month]);
+        return $this->render('fill', ['model' => $form]);
     }
 }
